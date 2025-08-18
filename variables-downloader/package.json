@@ -1,0 +1,12 @@
+{
+  "name": "variables-json-downloader",
+  "version": "1.0.0",
+  "description": "Export Figma Variables as JSON file with Variable IDs",
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "devDependencies": {
+    "@figma/plugin-typings": "^1.90.0",
+    "typescript": "^5.0.0"
+  }
+}

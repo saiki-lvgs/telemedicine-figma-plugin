@@ -1,0 +1,1114 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>変数JSONダウンローダー</title>
+  <style>
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: #ffffff;
+      font-size: 12px;
+      line-height: 1.4;
+    }
+    
+    .container {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      padding: 20px;
+    }
+    
+    .header {
+      text-align: center;
+      padding: 12px 0;
+      border-bottom: 1px solid #f0f0f0;
+      margin-bottom: 6px;
+    }
+    
+    .header h2 {
+      margin: 0 0 8px 0;
+      font-size: 18px;
+      font-weight: 700;
+      color: #1a1a1a;
+      letter-spacing: -0.5px;
+    }
+    
+    .header p {
+      margin: 0;
+      color: #666;
+      font-size: 12px;
+      line-height: 1.4;
+    }
+    
+    .button {
+      background: #18a0fb;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 12px 24px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 2px 4px rgba(24, 160, 251, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    
+    .button:hover {
+      background: #0d8ce8;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(24, 160, 251, 0.3);
+    }
+    
+    .button:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 4px rgba(24, 160, 251, 0.2);
+    }
+    
+    .button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+    
+    .status {
+      text-align: center;
+      padding: 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 500;
+      margin: 8px 0;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    .status.success {
+      background: #e8f5e8;
+      color: #2d662d;
+      border: 1px solid #5cb85c;
+    }
+    
+    .status.error {
+      background: #fdf2f2;
+      color: #a94442;
+      border: 1px solid #d9534f;
+    }
+    
+    .status.info {
+      background: #d9edf7;
+      color: #31708f;
+      border: 1px solid #5bc0de;
+    }
+    
+    .download-section {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 16px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      border: 1px solid #e9ecef;
+    }
+    
+    .filename-input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid #e9ecef;
+      border-radius: 8px;
+      font-size: 13px;
+      font-family: 'Monaco', 'Menlo', monospace;
+      background: white;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    
+    .filename-input:focus {
+      outline: none;
+      border-color: #18a0fb;
+      box-shadow: 0 0 0 3px rgba(24, 160, 251, 0.1);
+    }
+    
+    .close-button {
+      background: #f5f5f5;
+      color: #333;
+      margin-top: 8px;
+    }
+    
+    .close-button:hover {
+      background: #e8e8e8;
+    }
+    
+    .preview-section {
+      display: block;
+      margin-top: 16px;
+      flex: 1;
+      min-height: 0;
+    }
+    
+    .preview-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      padding: 10px 12px;
+      background: #f8f9fa;
+      border-radius: 6px;
+      border: 1px solid #e9ecef;
+    }
+    
+    .preview-title {
+      font-weight: 600;
+      font-size: 14px;
+      color: #1a1a1a;
+    }
+    
+    .preview-toggle {
+      background: #f8f9fa;
+      color: #495057;
+      border: 1px solid #e9ecef;
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .preview-toggle:hover {
+      background: #e9ecef;
+      border-color: #dee2e6;
+    }
+    
+    .copy-preview-btn {
+      background: #28a745;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      margin-left: 8px;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 2px 4px rgba(40, 167, 69, 0.2);
+    }
+    
+    .icon-copy {
+      width: 12px;
+      height: 12px;
+    }
+    
+    .copy-preview-btn:hover {
+      background: #1e7e34;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+    }
+    
+    .copy-preview-btn.copied {
+      background: #6c757d;
+      transform: none;
+      box-shadow: none;
+    }
+    
+    .preview-content {
+      border: 1px solid #e9ecef;
+      border-radius: 8px;
+      background: #ffffff;
+      padding: 12px;
+      font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+      font-size: 10px;
+      line-height: 1.4;
+      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+      overflow: visible; /* 外枠はスクロールさせない */
+    }
+    
+    .preview-content::-webkit-scrollbar {
+      width: 8px;
+    }
+    
+    .preview-content::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 4px;
+    }
+    
+    .preview-content::-webkit-scrollbar-thumb {
+      background: #c1c1c1;
+      border-radius: 4px;
+    }
+    
+    .preview-content::-webkit-scrollbar-thumb:hover {
+      background: #a8a8a8;
+    }
+    
+    .variable-item {
+      background: white;
+      border: 1px solid #eee;
+      border-radius: 4px;
+      padding: 8px;
+      margin-bottom: 6px;
+      font-size: 10px;
+    }
+    
+    .variable-item:last-child {
+      margin-bottom: 0;
+    }
+    
+    .variable-name {
+      font-weight: 600;
+      color: #0066cc;
+      margin-bottom: 2px;
+    }
+    
+    .variable-detail {
+      color: #666;
+      font-family: 'Monaco', 'Menlo', monospace;
+      font-size: 9px;
+      line-height: 1.3;
+    }
+    
+    .variable-id {
+      color: #999;
+      font-size: 8px;
+      margin-top: 2px;
+    }
+    
+    .preview-expanded {
+      max-height: none;
+    }
+    
+    .search-section {
+      display: block;
+      margin-bottom: 12px;
+    }
+    
+    .search-input {
+      width: 100%;
+      padding: 6px 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 11px;
+      margin-bottom: 8px;
+    }
+    
+    .search-input:focus {
+      outline: none;
+      border-color: #18a0fb;
+    }
+    
+    .filter-buttons {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+    
+    .filter-btn {
+      background: #f5f5f5;
+      color: #333;
+      border: 1px solid #ddd;
+      border-radius: 3px;
+      padding: 3px 6px;
+      font-size: 9px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .filter-btn:hover {
+      background: #e8e8e8;
+    }
+    
+    .filter-btn.active {
+      background: #18a0fb;
+      color: white;
+      border-color: #18a0fb;
+    }
+    
+    .no-results {
+      text-align: center;
+      color: #666;
+      font-style: italic;
+      padding: 20px;
+    }
+    
+    .view-options {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 8px;
+    }
+    
+    .view-btn {
+      background: #f5f5f5;
+      color: #333;
+      border: 1px solid #ddd;
+      border-radius: 3px;
+      padding: 4px 8px;
+      font-size: 9px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .view-btn:hover {
+      background: #e8e8e8;
+    }
+    
+    .view-btn.active {
+      background: #18a0fb;
+      color: white;
+      border-color: #18a0fb;
+    }
+    
+    .collection-group {
+      margin-bottom: 12px;
+      border: 1px solid #eee;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    
+    .collection-header {
+      background: #f8f9fa;
+      padding: 8px 12px;
+      border-bottom: 1px solid #eee;
+      font-weight: 600;
+      font-size: 11px;
+      color: #495057;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+    }
+    
+    .collection-header:hover {
+      background: #e9ecef;
+    }
+    
+    .collection-count {
+      font-weight: normal;
+      color: #6c757d;
+      font-size: 9px;
+    }
+    
+    .collection-content {
+      padding: 8px;
+    }
+    
+    .collection-content .variable-item {
+      margin-bottom: 4px;
+    }
+    
+    .collection-collapsed .collection-content {
+      display: none;
+    }
+    
+    .variable-actions {
+      display: flex;
+      gap: 4px;
+      margin-top: 4px;
+    }
+    
+    .copy-btn {
+      background: #f8f9fa;
+      color: #6c757d;
+      border: 1px solid #dee2e6;
+      border-radius: 3px;
+      padding: 2px 6px;
+      font-size: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .copy-btn:hover {
+      background: #e9ecef;
+      color: #495057;
+    }
+    
+    .copy-btn.copied {
+      background: #d4edda;
+      color: #155724;
+      border-color: #c3e6cb;
+    }
+    
+    .export-options {
+      margin-bottom: 8px;
+    }
+    
+    .export-format {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 8px;
+    }
+    
+    .format-btn {
+      background: #f5f5f5;
+      color: #333;
+      border: 1px solid #ddd;
+      border-radius: 3px;
+      padding: 4px 8px;
+      font-size: 9px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .format-btn:hover {
+      background: #e8e8e8;
+    }
+    
+    .format-btn.active {
+      background: #28a745;
+      color: white;
+      border-color: #28a745;
+    }
+    
+    .stats-section {
+      display: block;
+      background: #f8f9fa;
+      border: 1px solid #dee2e6;
+      border-radius: 4px;
+      padding: 8px;
+      margin-bottom: 8px;
+      font-size: 10px;
+    }
+    
+    .stats-title {
+      font-weight: 600;
+      margin-bottom: 4px;
+      color: #495057;
+    }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px;
+    }
+    
+    .stat-item {
+      background: white;
+      padding: 4px 6px;
+      border-radius: 3px;
+      border: 1px solid #e9ecef;
+    }
+    
+    .stat-label {
+      color: #6c757d;
+      font-size: 8px;
+    }
+    
+    .stat-value {
+      font-weight: 600;
+      color: #495057;
+    }
+    
+    .warnings-section {
+      display: block;
+      background: #fff3cd;
+      border: 1px solid #ffeaa7;
+      border-radius: 4px;
+      padding: 8px;
+      margin-bottom: 8px;
+    }
+    
+    .warnings-title {
+      font-weight: 600;
+      color: #856404;
+      font-size: 10px;
+      margin-bottom: 4px;
+    }
+    
+    .warning-item {
+      color: #856404;
+      font-size: 9px;
+      margin-bottom: 2px;
+      padding-left: 8px;
+      position: relative;
+    }
+    
+    .warning-item::before {
+      content: "⚠️";
+      position: absolute;
+      left: 0;
+    }
+    
+    .processing-options {
+      margin-bottom: 20px;
+      padding: 16px;
+      background: #f8f9fa;
+      border: 1px solid #e9ecef;
+      border-radius: 8px;
+    }
+    
+    .processing-title {
+      font-weight: 600;
+      font-size: 14px;
+      color: #1a1a1a;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #e9ecef;
+    }
+    
+    .processing-radio {
+      display: flex;
+      gap: 24px;
+    }
+    
+    .radio-option {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 6px;
+      transition: background-color 0.2s;
+    }
+    
+    .radio-option:hover {
+      background-color: #e9ecef;
+    }
+    
+    .radio-option input[type="radio"] {
+      margin: 0;
+      width: 16px;
+      height: 16px;
+      accent-color: #18a0fb;
+    }
+    
+    .radio-option label {
+      cursor: pointer;
+      font-size: 13px;
+      color: #333;
+      font-weight: 500;
+    }
+    
+    /* ツールチップ */
+    .tooltip-container {
+      position: relative;
+      display: inline-block;
+    }
+    
+    .tooltip {
+      position: absolute;
+      bottom: 125%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #333;
+      color: white;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 11px;
+      white-space: nowrap;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s, visibility 0.3s;
+      pointer-events: none;
+    }
+    
+    .tooltip::after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      margin-left: -5px;
+      border-width: 5px;
+      border-style: solid;
+      border-color: #333 transparent transparent transparent;
+    }
+    
+    .tooltip-container:hover .tooltip {
+      opacity: 1;
+      visibility: visible;
+    }
+    
+    /* シンプルなアイコン */
+    .icon {
+      width: 16px;
+      height: 16px;
+      display: inline-block;
+      vertical-align: middle;
+      margin-right: 4px;
+    }
+    
+    .icon-download {
+      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Cpath d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4'/%3E%3Cpolyline points='7,10 12,15 17,10'/%3E%3Cline x1='12' y1='15' x2='12' y2='3'/%3E%3C/svg%3E") no-repeat center;
+      background-size: contain;
+    }
+    
+    .icon-settings {
+      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Ccircle cx='12' cy='12' r='3'/%3E%3Cpath d='M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1 1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z'/%3E%3C/svg%3E") no-repeat center;
+      background-size: contain;
+    }
+    
+    .icon-export {
+      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Cpath d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4'/%3E%3Cpolyline points='17,8 12,3 7,8'/%3E%3Cline x1='12' y1='3' x2='12' y2='15'/%3E%3C/svg%3E") no-repeat center;
+      background-size: contain;
+    }
+    
+    .icon-close {
+      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Cline x1='18' y1='6' x2='6' y2='18'/%3E%3Cline x1='6' y1='6' x2='18' y2='18'/%3E%3C/svg%3E") no-repeat center;
+      background-size: contain;
+    }
+    
+    /* JSONプレビュー */
+    .preview-info {
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: #333;
+      padding: 8px;
+      background: #f8f9fa;
+      border-radius: 4px;
+    }
+    
+    .json-preview {
+      background: #f8f9fa;
+      border: 1px solid #e9ecef;
+      border-radius: 4px;
+      padding: 12px;
+      font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+      font-size: 11px;
+      line-height: 1.4;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      max-height: 400px;
+      overflow-y: auto; /* JSONのみスクロール */
+      overflow-x: hidden;
+      /* スクロールバーのスタイリング */
+      scrollbar-width: thin;
+      scrollbar-color: #c1c1c1 #f1f1f1;
+    }
+    
+    .json-preview::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    
+    .json-preview::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 4px;
+    }
+    
+    .json-preview::-webkit-scrollbar-thumb {
+      background: #c1c1c1;
+      border-radius: 4px;
+    }
+    
+    .json-preview::-webkit-scrollbar-thumb:hover {
+      background: #a8a8a8;
+    }
+    
+
+    
+    /* マッピング情報 */
+    .mapping-info {
+      background: #e3f2fd;
+      border: 1px solid #2196f3;
+      border-radius: 4px;
+      padding: 8px 12px;
+      margin: 8px 0;
+      font-size: 11px;
+      color: #1976d2;
+    }
+    
+    .mapping-info > div {
+      margin: 2px 0;
+    }
+    
+
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h2>Figma Variables Downloader</h2>
+    </div>
+    
+    <!-- リサイズハンドル -->
+
+    
+
+    
+    <div id="status"></div>
+    
+          <div id="downloadSection" class="download-section" style="display: block;">
+
+      
+
+      
+      <div class="processing-options">
+        <div class="processing-title">処理モード</div>
+        <div class="processing-radio">
+          <div class="radio-option">
+            <input type="radio" id="processedMode" name="processingMode" value="processed" checked>
+            <label for="processedMode">マッピングデータ</label>
+          </div>
+          
+          <div class="radio-option">
+            <input type="radio" id="rawMode" name="processingMode" value="raw">
+            <label for="rawMode">生データ</label>
+          </div>
+        </div>
+      </div>
+      
+
+      <input 
+        type="text" 
+        id="filename" 
+        class="filename-input" 
+        value="figma-variables-mapping.json" 
+        placeholder="ファイル名を入力..."
+      >
+      <button id="downloadBtn" class="button">
+        <span class="icon icon-download"></span>
+        ダウンロード
+      </button>
+    </div>
+    
+          <div id="previewSection" class="preview-section" style="display: block;">
+        <div class="preview-header">
+          <span class="preview-title">プレビュー</span>
+          <button id="copyPreviewBtn" class="copy-preview-btn">
+            <svg class="icon icon-copy" width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+            </svg>
+            コピー
+          </button>
+        </div>
+              <div id="previewContent" class="preview-content">
+          <div class="preview-info">プレビュー</div>
+          <div class="no-results">
+            ダウンロードボタンをクリックして、Figmaドキュメント内の変数をスキャンしてください。
+          </div>
+        </div>
+    </div>
+    
+    <button id="closeBtn" class="button close-button">
+      <span class="icon icon-close"></span>
+      閉じる
+    </button>
+  </div>
+
+  <script>
+    let variablesData = null;
+    
+    // ボタン要素取得
+
+    const downloadBtn = document.getElementById('downloadBtn');
+    const closeBtn = document.getElementById('closeBtn');
+    const statusDiv = document.getElementById('status');
+    const downloadSection = document.getElementById('downloadSection');
+    const filenameInput = document.getElementById('filename');
+    const previewSection = document.getElementById('previewSection');
+    const previewContent = document.getElementById('previewContent');
+    const copyPreviewBtn = document.getElementById('copyPreviewBtn');
+
+
+    const processedModeRadio = document.getElementById('processedMode');
+    const rawModeRadio = document.getElementById('rawMode');
+    
+    // グローバル変数
+    let processingMode = 'processed'; // 'processed' または 'raw'
+    
+
+    
+    // SCSS変数名の自動生成ルール
+    function generateScssVariableName(figmaName) {
+      // 全ての / を - に変換して $ プレフィックスを付ける
+      return `$${figmaName.replace(/\//g, '-')}`;
+    }
+    
+    // ステータス表示
+    function showStatus(message, type = 'info') {
+      statusDiv.className = `status ${type}`;
+      statusDiv.textContent = message;
+      statusDiv.style.display = 'block';
+    }
+    
+
+    
+    // Processed形式にデータを変換
+    function convertToProcessedFormat(rawData) {
+      const processedMapping = {};
+      const unmappedVariables = [];
+      
+      Object.entries(rawData).forEach(([fullId, variable]) => {
+        // Variable IDからプレフィックス削除
+        const cleanId = fullId.replace("VariableID:", "");
+        
+        // Figma名からSCSS変数名を自動生成
+        const figmaName = variable.name;
+        const scssVariable = generateScssVariableName(figmaName);
+        
+        // 全ての変数をマッピング（自動生成なので失敗しない）
+        processedMapping[cleanId] = scssVariable;
+      });
+      
+      return {
+        mapping: processedMapping,
+        unmapped: unmappedVariables
+      };
+    }
+    
+    // エクスポート用データを取得
+    function getExportData() {
+      if (processingMode === 'processed') {
+        const result = convertToProcessedFormat(variablesData);
+        return result.mapping;
+      } else {
+        return variablesData; // Raw形式はそのまま
+      }
+    }
+    
+    // プレビュー表示（常に全表示）
+    function renderPreview(data) {
+      if (!data || Object.keys(data).length === 0) {
+        previewContent.innerHTML = `
+          <div class="preview-info">プレビュー</div>
+          <div class="no-results">
+            ダウンロードボタンをクリックして、Figmaドキュメント内の変数をスキャンしてください。
+          </div>
+        `;
+        return;
+      }
+      
+      // ダウンロードされるデータの内容を表示（常に全件）
+      const exportData = getExportData();
+      const jsonContent = JSON.stringify(exportData, null, 2);
+      
+      const exportCount = Object.keys(exportData).length;
+      const modeText = processingMode === 'processed' ? 'マッピングデータ' : 'Rawデータ';
+      let html = `<div class="preview-info">ダウンロードされるデータ (${exportCount}件) - ${modeText}</div>`;
+      
+      // マッピングデータの場合、マッピング状況の詳細を表示
+      if (processingMode === 'processed') {
+        const result = convertToProcessedFormat(variablesData);
+        const totalVariables = Object.keys(variablesData).length;
+        const mappedCount = Object.keys(result.mapping).length;
+        const unmappedCount = result.unmapped.length;
+        
+        html += `<div class="mapping-info">
+          <div>元の変数数: ${totalVariables}件</div>
+          <div>マッピング済み: ${mappedCount}件</div>
+          <div>未マッピング: ${unmappedCount}件</div>
+        </div>`;
+      }
+      
+      html += `<pre class="json-preview">${jsonContent}</pre>`;
+      
+      previewContent.innerHTML = html;
+      
+      // 結果数をタイトルに表示
+      const titleElement = document.querySelector('.preview-title');
+      if (titleElement) {
+        titleElement.textContent = `プレビュー (${exportCount}件)`;
+      }
+    }
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    // ダウンロード実行
+    downloadBtn.addEventListener('click', () => {
+      const filename = filenameInput.value || getDefaultFilename();
+      const { content, mimeType } = generateExportContent();
+      const blob = new Blob([content], { type: mimeType });
+      const url = URL.createObjectURL(blob);
+      
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+      showStatus(`ダウンロード完了: ${filename}`, 'success');
+    });
+    
+    // デフォルトファイル名を取得
+    function getDefaultFilename() {
+      return `figma-variables.json`;
+    }
+    
+    // エクスポートコンテンツを生成
+    function generateExportContent() {
+      const exportData = getExportData();
+      return {
+        content: JSON.stringify(exportData, null, 2),
+        mimeType: 'application/json'
+      };
+    }
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    // プレビューコピー
+    copyPreviewBtn.addEventListener('click', copyPreviewContent);
+    
+
+    
+    // Processing Mode切り替え
+    processedModeRadio.addEventListener('change', () => {
+      if (processedModeRadio.checked) {
+        processingMode = 'processed';
+        updateFilenameForProcessingMode();
+        // プレビューを更新
+        if (variablesData && Object.keys(variablesData).length > 0) {
+          renderPreview(variablesData);
+        }
+      }
+    });
+    
+    rawModeRadio.addEventListener('change', () => {
+      if (rawModeRadio.checked) {
+        processingMode = 'raw';
+        updateFilenameForProcessingMode();
+        // プレビューを更新
+        if (variablesData && Object.keys(variablesData).length > 0) {
+          renderPreview(variablesData);
+        }
+      }
+    });
+    
+    // Processing Mode変更時のファイル名更新
+    function updateFilenameForProcessingMode() {
+      const currentName = filenameInput.value;
+      const nameWithoutExt = currentName.replace(/\.[^/.]+$/, '');
+      const baseName = processingMode === 'processed' ? 'figma-variables-mapping' : 'figma-variables';
+      const extension = getDefaultFilename().split('.').pop();
+      filenameInput.value = `${baseName}.${extension}`;
+    }
+    
+
+    
+    // フォールバックコピー関数（古いブラウザやFigma環境用）
+    function fallbackCopyTextToClipboard(text) {
+      const textArea = document.createElement('textarea');
+      textArea.value = text;
+      textArea.style.position = 'fixed';
+      textArea.style.left = '-999999px';
+      textArea.style.top = '-999999px';
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      
+      try {
+        document.execCommand('copy');
+        textArea.remove();
+      } catch (err) {
+        console.error('Fallback copy failed:', err);
+        textArea.remove();
+        throw err;
+      }
+    }
+    
+    // プレビュー内容をコピー
+    async function copyPreviewContent() {
+      if (!variablesData || Object.keys(variablesData).length === 0) {
+        showStatus('コピーするデータがありません', 'error');
+        return;
+      }
+      
+      try {
+        const exportData = getExportData();
+        const jsonContent = JSON.stringify(exportData, null, 2);
+        
+        // モダンなclipboard APIを試す
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(jsonContent);
+        } else {
+          // フォールバック: 古いブラウザやFigma環境用
+          fallbackCopyTextToClipboard(jsonContent);
+        }
+        
+        // ボタンの状態を変更
+        copyPreviewBtn.innerHTML = '<svg class="icon icon-copy" width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>コピー完了！';
+        copyPreviewBtn.classList.add('copied');
+        
+        setTimeout(() => {
+          copyPreviewBtn.innerHTML = '<svg class="icon icon-copy" width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>コピー';
+          copyPreviewBtn.classList.remove('copied');
+        }, 2000);
+        
+        showStatus('プレビュー内容をクリップボードにコピーしました', 'success');
+      } catch (err) {
+        console.error('Copy failed:', err);
+        showStatus('コピーに失敗しました', 'error');
+      }
+    }
+    
+    // プラグインクローズ
+    closeBtn.addEventListener('click', () => {
+      parent.postMessage({ pluginMessage: { type: 'CLOSE_PLUGIN' } }, '*');
+    });
+    
+    // ページ読み込み時に自動的に変数をスキャン
+    window.addEventListener('load', () => {
+      showStatus('変数をスキャン中...', 'info');
+      parent.postMessage({ pluginMessage: { type: 'START_EXPORT' } }, '*');
+    });
+    
+    // メインスレッドからのメッセージ受信
+    window.onmessage = (event) => {
+      const msg = event.data.pluginMessage;
+      
+      if (msg.type === 'VARIABLES_DATA') {
+        variablesData = msg.data;
+        
+        showStatus(`${msg.count}個の変数が見つかりました`, 'success');
+        
+        downloadSection.style.display = 'block';
+        previewSection.style.display = 'block';
+        
+        // プレビューをレンダリング
+        renderPreview(variablesData);
+        previewContent.classList.remove('preview-expanded');
+        previewToggle.textContent = '展開';
+        
+        // ファイル名を設定
+        filenameInput.value = getDefaultFilename();
+        
+        // ラジオボタンの状態をリセット
+        processingMode = 'processed';
+        processedModeRadio.checked = true;
+        rawModeRadio.checked = false;
+      } else if (msg.type === 'ERROR') {
+        // 詳細エラー情報があれば表示
+        if (msg.detailedMessage) {
+          showStatus(`エラー: ${msg.message}`, 'error');
+          console.error('Detailed error:', msg.detailedMessage);
+          console.error('Timestamp:', msg.timestamp);
+        } else {
+          showStatus(`エラー: ${msg.message}`, 'error');
+        }
+        
+        downloadSection.style.display = 'none';
+        previewSection.style.display = 'none';
+      }
+    };
+  </script>
+</body>
+</html>
