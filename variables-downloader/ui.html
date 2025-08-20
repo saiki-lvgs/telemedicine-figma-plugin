@@ -42,6 +42,33 @@
       line-height: 1.4;
     }
     
+    .reload-button {
+      background: #6c757d;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 8px 16px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 12px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    
+    .reload-button:hover {
+      background: #5a6268;
+      transform: translateY(-1px);
+    }
+    
+    .reload-button:active {
+      transform: translateY(0);
+    }
+    
     .button {
       background: #18a0fb;
       color: white;
@@ -57,6 +84,8 @@
       align-items: center;
       justify-content: center;
       gap: 8px;
+      margin-left: auto;
+      margin-right: auto;
     }
     
     .button:hover {
@@ -113,10 +142,11 @@
       background: #f8f9fa;
       border-radius: 8px;
       border: 1px solid #e9ecef;
+      align-items: center;
     }
     
     .filename-input {
-      width: 100%;
+      width: 80%;
       padding: 12px 16px;
       border: 2px solid #e9ecef;
       border-radius: 8px;
@@ -124,6 +154,7 @@
       font-family: 'Monaco', 'Menlo', monospace;
       background: white;
       transition: border-color 0.2s, box-shadow 0.2s;
+      text-align: center;
     }
     
     .filename-input:focus {
@@ -132,15 +163,7 @@
       box-shadow: 0 0 0 3px rgba(24, 160, 251, 0.1);
     }
     
-    .close-button {
-      background: #f5f5f5;
-      color: #333;
-      margin-top: 8px;
-    }
-    
-    .close-button:hover {
-      background: #e8e8e8;
-    }
+
     
     .preview-section {
       display: block;
@@ -339,6 +362,62 @@
       font-weight: 500;
     }
     
+    .collection-options {
+      margin-bottom: 20px;
+      padding: 16px;
+      background: #f8f9fa;
+      border: 1px solid #e9ecef;
+      border-radius: 8px;
+    }
+    
+    .collection-title {
+      font-weight: 600;
+      font-size: 14px;
+      color: #1a1a1a;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #e9ecef;
+    }
+    
+    .collection-radio {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    
+    .collection-option {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 6px;
+      transition: background-color 0.2s;
+    }
+    
+    .collection-option:hover {
+      background-color: #e9ecef;
+    }
+    
+    .collection-option input[type="radio"] {
+      margin: 0;
+      width: 16px;
+      height: 16px;
+      accent-color: #18a0fb;
+    }
+    
+    .collection-option label {
+      cursor: pointer;
+      font-size: 13px;
+      color: #333;
+      font-weight: 500;
+    }
+    
+    .collection-count {
+      color: #666;
+      font-size: 11px;
+      font-weight: normal;
+    }
+    
     /* シンプルなアイコン */
     .icon {
       width: 16px;
@@ -426,6 +505,12 @@
   <div class="container">
     <div class="header">
       <h2>Figma Variables Downloader</h2>
+      <button id="reloadBtn" class="reload-button">
+        <svg class="icon icon-reload" width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
+        </svg>
+        再スキャン
+      </button>
     </div>
     
     <!-- リサイズハンドル -->
@@ -452,6 +537,13 @@
             <input type="radio" id="rawMode" name="processingMode" value="raw">
             <label for="rawMode">生データ</label>
           </div>
+        </div>
+      </div>
+      
+      <div class="collection-options">
+        <div class="collection-title">コレクション選択</div>
+        <div class="collection-radio" id="collectionRadio">
+          <!-- 動的に生成される -->
         </div>
       </div>
       
@@ -487,19 +579,16 @@
         </div>
     </div>
     
-    <button id="closeBtn" class="button close-button">
-      <span class="icon icon-close"></span>
-      閉じる
-    </button>
+
   </div>
 
   <script>
     let variablesData = null;
     
     // ボタン要素取得
-
+    const reloadBtn = document.getElementById('reloadBtn');
     const downloadBtn = document.getElementById('downloadBtn');
-    const closeBtn = document.getElementById('closeBtn');
+
     const statusDiv = document.getElementById('status');
     const downloadSection = document.getElementById('downloadSection');
     const filenameInput = document.getElementById('filename');
@@ -513,6 +602,8 @@
     
     // グローバル変数
     let processingMode = 'processed'; // 'processed' または 'raw'
+    let selectedCollection = 'all'; // 'all' または コレクションID
+    let collectionsData = null;
     
 
     
@@ -556,12 +647,75 @@
     
     // エクスポート用データを取得
     function getExportData() {
+      let filteredData = variablesData;
+      
+      // コレクションでフィルタリング
+      if (selectedCollection !== 'all') {
+        filteredData = Object.fromEntries(
+          Object.entries(variablesData).filter(([id, variable]) => 
+            variable.collection === selectedCollection
+          )
+        );
+      }
+      
       if (processingMode === 'processed') {
-        const result = convertToProcessedFormat(variablesData);
+        const result = convertToProcessedFormat(filteredData);
         return result.mapping;
       } else {
-        return variablesData; // Raw形式はそのまま
+        return filteredData; // Raw形式はそのまま
       }
+    }
+    
+    // コレクション選択UIをレンダリング
+    function renderCollectionOptions() {
+      const collectionRadio = document.getElementById('collectionRadio');
+      
+      if (!collectionsData || Object.keys(collectionsData).length === 0) {
+        // 初期状態またはデータがない場合
+        collectionRadio.innerHTML = `
+          <div class="collection-option">
+            <input type="radio" id="collectionAll" name="collectionSelection" value="all" checked disabled>
+            <label for="collectionAll">All <span class="collection-count">(0件)</span></label>
+          </div>
+        `;
+        return;
+      }
+      
+      let html = '';
+      
+      // All オプション
+      const allCount = Object.keys(variablesData || {}).length;
+      html += `
+        <div class="collection-option">
+          <input type="radio" id="collectionAll" name="collectionSelection" value="all" ${selectedCollection === 'all' ? 'checked' : ''}>
+          <label for="collectionAll">All <span class="collection-count">(${allCount}件)</span></label>
+        </div>
+      `;
+      
+      // 各コレクションのオプション
+      Object.entries(collectionsData).forEach(([collectionId, collection]) => {
+        const collectionName = collection.name;
+        const collectionCount = Object.values(variablesData || {}).filter(variable => 
+          variable.collection === collectionId
+        ).length;
+        
+        html += `
+          <div class="collection-option">
+            <input type="radio" id="collection${collectionId}" name="collectionSelection" value="${collectionId}" ${selectedCollection === collectionId ? 'checked' : ''}>
+            <label for="collection${collectionId}">${collectionName} <span class="collection-count">(${collectionCount}件)</span></label>
+          </div>
+        `;
+      });
+      
+      collectionRadio.innerHTML = html;
+      
+      // イベントリスナーを設定
+      document.querySelectorAll('input[name="collectionSelection"]').forEach(radio => {
+        radio.addEventListener('change', (e) => {
+          selectedCollection = e.target.value;
+          renderPreview(variablesData);
+        });
+      });
     }
     
     // プレビュー表示（常に全表示）
@@ -570,7 +724,7 @@
         previewContent.innerHTML = `
           <div class="preview-info">プレビュー</div>
           <div class="no-results">
-            ダウンロードボタンをクリックして、Figmaドキュメント内の変数をスキャンしてください。
+            変数をスキャン中... しばらくお待ちください。
           </div>
         `;
         return;
@@ -669,6 +823,12 @@
     
 
     
+    // リロードボタン
+    reloadBtn.addEventListener('click', () => {
+      showStatus('変数を再スキャン中...', 'info');
+      parent.postMessage({ pluginMessage: { type: 'START_EXPORT' } }, '*');
+    });
+    
     // プレビューコピー
     copyPreviewBtn.addEventListener('click', copyPreviewContent);
     
@@ -764,33 +924,80 @@
       }
     }
     
-    // プラグインクローズ
-    closeBtn.addEventListener('click', () => {
-      parent.postMessage({ pluginMessage: { type: 'CLOSE_PLUGIN' } }, '*');
-    });
+
     
     // ページ読み込み時に自動的に変数をスキャン
-    window.addEventListener('load', () => {
+    function startScan() {
+      console.log('Starting scan...'); // デバッグログ
       showStatus('変数をスキャン中...', 'info');
+      // 初期状態でコレクション選択UIを表示（空の状態）
+      renderCollectionOptions();
       parent.postMessage({ pluginMessage: { type: 'START_EXPORT' } }, '*');
+    }
+    
+    // 初期化状態をログ出力
+    console.log('Script loaded, readyState:', document.readyState);
+    console.log('DOM ready:', document.readyState === 'loading' ? 'No' : 'Yes');
+    
+    // 複数のイベントでスキャンを開始
+    window.addEventListener('DOMContentLoaded', () => {
+      console.log('DOMContentLoaded event fired');
+      startScan();
     });
+    
+    window.addEventListener('load', () => {
+      console.log('Load event fired');
+      startScan();
+    });
+    
+    // 即座にスキャンを開始（既にDOMが準備できている場合）
+    if (document.readyState === 'loading') {
+      console.log('DOM still loading, waiting for events...');
+    } else {
+      console.log('DOM already ready, starting scan immediately');
+      startScan();
+    }
+    
+    // 追加の初期化方法：setTimeoutで遅延実行
+    setTimeout(() => {
+      console.log('Timeout fallback: checking if scan was started');
+      if (!variablesData) {
+        console.log('No data found, starting scan via timeout');
+        startScan();
+      }
+    }, 100);
+    
+    // さらに確実にするため、もう少し遅くにもチェック
+    setTimeout(() => {
+      console.log('Second timeout fallback: checking if scan was started');
+      if (!variablesData) {
+        console.log('Still no data, starting scan via second timeout');
+        startScan();
+      }
+    }, 500);
     
     // メインスレッドからのメッセージ受信
     window.onmessage = (event) => {
       const msg = event.data.pluginMessage;
+      console.log('Received message:', msg); // デバッグログ
       
       if (msg.type === 'VARIABLES_DATA') {
+        console.log('Variables data received:', msg.data); // デバッグログ
+        console.log('Collections data received:', msg.collections); // デバッグログ
+        
         variablesData = msg.data;
+        collectionsData = msg.collections;
         
         showStatus(`${msg.count}個の変数が見つかりました`, 'success');
         
         downloadSection.style.display = 'block';
         previewSection.style.display = 'block';
         
+        // コレクション選択UIをレンダリング
+        renderCollectionOptions();
+        
         // プレビューをレンダリング
         renderPreview(variablesData);
-        previewContent.classList.remove('preview-expanded');
-        previewToggle.textContent = '展開';
         
         // ファイル名を設定
         filenameInput.value = getDefaultFilename();
@@ -800,6 +1007,7 @@
         processedModeRadio.checked = true;
         rawModeRadio.checked = false;
       } else if (msg.type === 'ERROR') {
+        console.error('Error received:', msg); // デバッグログ
         // 詳細エラー情報があれば表示
         if (msg.detailedMessage) {
           showStatus(`エラー: ${msg.message}`, 'error');
