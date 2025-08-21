@@ -69,3 +69,5 @@ yarn.lock
 # Temporary folders
 tmp/
 temp/
+
+.specstory/
