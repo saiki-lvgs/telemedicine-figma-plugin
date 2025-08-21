@@ -1,303 +1,200 @@
-# Figma Variables JSON Downloader Plugin
+# Figma Variables Downloader
 
-🔽 **Export Figma Variables as JSON, CSV, TypeScript, or CSS files with advanced preview and filtering capabilities.**
+Figmaドキュメント内の変数（Variables）をJSON形式でダウンロードできるプラグインです。
 
-## ✨ Features
+## 🚀 **機能**
 
-### 🎯 **Core Functionality**
-- **Export Variables**: Download all local variables from your Figma document
-- **Multiple Formats**: Support for JSON, CSV, TypeScript definitions, and CSS custom properties
-- **Variable IDs**: Includes Figma internal variable IDs for integration purposes
+### **主要機能**
+- **自動スキャン**: プラグイン起動時に自動的に変数をスキャン
+- **手動リロード**: 再スキャンボタンで手動で変数を再取得
+- **コレクション選択**: 特定のコレクション（Global、Levcli、Refill等）を選択してダウンロード
+- **データ形式選択**: Rawデータまたはマッピングデータ（SCSS変数形式）を選択
+- **プレビュー機能**: ダウンロード前にデータ内容を確認
+- **ワンクリックコピー**: プレビュー内容をクリップボードにコピー
 
-### 🔍 **Advanced Preview & Search**
-- **Real-time Preview**: See variables before downloading
-- **Search & Filter**: Find variables by name, type, or value
-- **Collection Grouping**: View variables organized by their collections
-- **Type Filtering**: Filter by COLOR, FLOAT, STRING, BOOLEAN types
+### **データ形式**
+- **Rawデータ**: Figmaの変数データをそのまま出力
+- **マッピングデータ**: SCSS変数形式に変換（`XXX/YYY/ZZZ` → `$XXX-YYY-ZZZ`）
 
-### 📊 **Data Management**
-- **Statistics Dashboard**: View variable counts and type breakdowns
-- **Validation & Warnings**: Get notified about potential issues
-- **Copy Functions**: Copy individual variable IDs, names, or values
-- **Collection Information**: Full collection metadata included
+## 🛠️ **インストール・セットアップ**
 
-### 🔧 **Processing Modes**
+### **前提条件**
+- Figma Desktop App
+- Node.js 16.0以上
+- npm または yarn
 
-#### Processed Mode (Default - Production Ready)
-Clean Variable IDs + SCSS variable names mapping for production use
-```json
-{
-  "5344:29738": "$primary-active",
-  "5345:29739": "$primary-heading",
-  "5345:29740": "$primary-active-studio-lp"
-}
-```
-
-#### Raw Mode (Full Variable Data)
-Complete unmodified data with all metadata, values, and types
-```json
-{
-  "VariableID:123": {
-    "name": "color/primary/bg",
-    "value": { "r": 0.2, "g": 0.4, "b": 0.8, "a": 1 },
-    "type": "COLOR",
-    "collection": "CollectionID:456",
-    "collectionName": "Design System"
-  }
-}
-```
-
-### 📁 **Export Formats**
-
-#### CSV Format
-```csv
-ID,Name,Type,Value,Collection
-"VariableID:123","primary-color","COLOR","rgba(51, 102, 204, 1)","Design System"
-```
-
-#### TypeScript Format
-```typescript
-export type VariableId = 
-  | "VariableID:123"
-  | "VariableID:124";
-
-export interface VariableMapping {
-  "VariableID:123": {
-    name: "primary-color";
-    type: "COLOR";
-    collection: "CollectionID:456";
-    collectionName: "Design System";
-  };
-}
-```
-
-#### CSS Custom Properties
-```css
-:root {
-  --primary-color: rgb(51, 102, 204); /* COLOR - Design System */
-  --base-spacing: 16; /* FLOAT - Design System */
-}
-```
-
-## 🔧 Installation & Setup
-
-### Prerequisites
-- Figma Desktop App or Web App
-- Node.js (for development)
-- TypeScript compiler
-
-### Development Setup
-
-1. **Clone/Download the plugin files**
-   ```bash
-   git clone [your-repo-url]
-   cd variables-downloader
-   ```
-
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
-
-3. **Build the plugin**
-   ```bash
-   npm run build
-   ```
-
-4. **Install in Figma**
-   - Open Figma Desktop App
-   - Go to `Plugins` → `Development` → `Import plugin from manifest`
-   - Select the `manifest.json` file from the `variables-downloader` folder
-
-### File Structure
-```
-variables-downloader/
-├── manifest.json     # Plugin configuration
-├── code.ts          # Main plugin logic (TypeScript)
-├── code.js          # Compiled JavaScript
-├── ui.html          # Plugin UI
-├── package.json     # Dependencies
-├── tsconfig.json    # TypeScript config
-└── README.md        # This file
-```
-
-## 🚀 Usage Guide
-
-### Basic Usage
-
-1. **Open your Figma document** that contains variables
-2. **Run the plugin**: `Plugins` → `Development` → `Variables JSON Downloader`
-3. **Export variables**: Click "🚀 Export Variables"
-4. **Review data**: Use the preview to check your variables
-5. **Choose processing mode**: Select "Processed" (default) for production or "Raw" for complete data
-6. **Choose format**: Select JSON, CSV, TypeScript, or CSS
-7. **Download**: Click "💾 Download" to save the file
-
-### Processing Mode Guide
-
-#### When to use Processed Mode
-- ✅ For production deployment
-- ✅ When you need clean Variable ID → SCSS variable mapping
-- ✅ For integration with existing SCSS workflows
-- ✅ When file size matters
-
-#### When to use Raw Mode
-- ✅ For debugging and analysis
-- ✅ When you need complete variable metadata
-- ✅ For custom processing scripts
-- ✅ When building your own mapping system
-
-### Advanced Features
-
-#### Search & Filter
-- **Search by name**: Type in the search box to find specific variables
-- **Filter by type**: Use type buttons (Colors, Numbers, Strings, Booleans)
-- **View by collection**: Switch to collection view to see grouped variables
-
-#### Preview Modes
-- **List View**: See all variables in a simple list
-- **Collection View**: Variables grouped by their collections
-- **Expand/Collapse**: Toggle between limited and full preview
-
-#### Copy Functions
-Each variable has copy buttons for:
-- **Copy ID**: Copy the Figma variable ID
-- **Copy Name**: Copy the variable name
-- **Copy Value**: Copy the formatted value
-
-## ⚙️ Configuration
-
-### Manifest.json
-```json
-{
-  "name": "Variables JSON Downloader",
-  "id": "variables-json-downloader",
-  "api": "1.0.0",
-  "main": "code.js",
-  "ui": "ui.html",
-  "capabilities": [],
-  "enableProposedApi": false,
-  "editorType": ["figma"],
-  "networkAccess": {
-    "allowedDomains": ["none"]
-  }
-}
-```
-
-### TypeScript Configuration
-```json
-{
-  "compilerOptions": {
-    "target": "es6",
-    "lib": ["es6"],
-    "strict": true,
-    "typeRoots": ["./node_modules/@types", "./node_modules/@figma"]
-  }
-}
-```
-
-## 🛠 Development
-
-### Building
+### **セットアップ手順**
 ```bash
+# リポジトリをクローン
+git clone <repository-url>
+cd telemedicine-figma-plugin/variables-downloader
+
+# 依存関係をインストール
+npm install
+
+# ビルド
 npm run build
 ```
 
-### TypeScript Compilation
-The plugin uses TypeScript for type safety. Make sure to compile before testing:
+### **Figmaプラグインへの追加**
+1. Figma Desktop Appを開く
+2. メニューバーから「Plugins」→「Development」→「New Plugin...」を選択
+3. 「Import plugin from manifest...」をクリック
+4. `manifest.json`ファイルを選択
+
+## 🧪 **テスト方法**
+
+### **基本的なテスト手順**
+
+#### **1. プラグイン起動テスト**
 ```bash
-tsc -p tsconfig.json
+# ビルド
+npm run build
+
+# Figmaでプラグインを起動
+# 自動スキャンが開始されることを確認
 ```
 
-### Adding Features
-1. **UI Changes**: Edit `ui.html`
-2. **Plugin Logic**: Edit `code.ts`
-3. **Compile**: Run `npm run build`
-4. **Test**: Reload plugin in Figma
+#### **2. 機能テスト**
 
-## 📋 Data Structure
+##### **自動スキャンテスト**
+- プラグイン起動時に「変数をスキャン中...」が表示される
+- スキャン完了後に変数数が表示される
+- コレクション選択UIが表示される
 
-### Variable Object
-```typescript
-interface VariableData {
-  name: string;           // Variable name
-  value: any;            // Variable value (depends on type)
-  type: string;          // "COLOR" | "FLOAT" | "STRING" | "BOOLEAN"
-  collection: string;    // Collection ID
-  collectionName: string; // Human-readable collection name
-  modes: number;         // Number of modes
-}
+##### **手動リロードテスト**
+- 再スキャンボタンをクリック
+- スキャンが再実行されることを確認
+- ステータスメッセージが更新される
+
+##### **データ形式切り替えテスト**
+- 「マッピングデータ」と「生データ」を切り替え
+- プレビュー内容が変更されることを確認
+- ファイル名が適切に更新される
+
+##### **コレクション選択テスト**
+- 各コレクション（All、Global、Levcli等）を選択
+- プレビュー内容がフィルタリングされることを確認
+- 件数が正しく表示される
+
+##### **ダウンロードテスト**
+- ダウンロードボタンをクリック
+- JSONファイルが正常にダウンロードされる
+- ファイル内容がプレビューと一致する
+
+##### **コピー機能テスト**
+- コピーボタンをクリック
+- プレビュー内容がクリップボードにコピーされる
+- ボタンの状態が「コピー済み」に変化する
+
+### **エラーテスト**
+
+#### **変数が存在しない場合**
+- 空のFigmaドキュメントでプラグインを起動
+- 適切なエラーメッセージが表示されることを確認
+
+#### **ネットワークエラー**
+- オフライン状態でプラグインを起動
+- エラーハンドリングが適切に動作することを確認
+
+## 🔧 **開発・デバッグ**
+
+### **開発環境のセットアップ**
+```bash
+# 開発用ビルド（watch mode）
+npm run dev
+
+# 本番用ビルド
+npm run build
+
+# 型チェック
+npm run type-check
 ```
 
-### Statistics Object
-```typescript
-interface Stats {
-  totalVariables: number;
-  collections: number;
-  typeBreakdown: Record<string, number>;
-  issues: string[];
-}
+### **デバッグ方法**
+
+#### **コンソールログの確認**
+1. Figmaプラグインを起動
+2. ブラウザの開発者ツール（F12）を開く
+3. Consoleタブでログを確認
+
+#### **主要なログメッセージ**
+```
+Script loaded, readyState: loading
+DOM ready: No
+DOMContentLoaded event fired
+Starting scan...
+Variables data received: {...}
+Collections data received: {...}
 ```
 
-## 🚨 Troubleshooting
+### **よくある問題と対処法**
 
-### Common Issues
+#### **変数が読み込まれない**
+- コンソールでエラーログを確認
+- `collectionsData is not defined`エラーの場合は変数宣言を確認
+- 重複宣言がないかチェック
 
-#### "No variables found"
-- **Cause**: Document has no local variables
-- **Solution**: Create variables in your Figma document first
+#### **UIが正しく表示されない**
+- CSSクラスが正しく適用されているか確認
+- 要素のIDが正しく設定されているか確認
+- イベントリスナーが適切に設定されているか確認
 
-#### Plugin won't load
-- **Cause**: Compilation errors or missing files
-- **Solution**: Run `npm run build` and check for errors
+## 📁 **ファイル構成**
 
-#### Export fails
-- **Cause**: Browser clipboard permissions or file system access
-- **Solution**: Ensure browser allows downloads and clipboard access
+```
+variables-downloader/
+├── README.md           # このファイル
+├── manifest.json       # Figmaプラグインの設定
+├── package.json        # 依存関係とスクリプト
+├── tsconfig.json       # TypeScript設定
+├── code.ts            # メインスレッド（Figma API）
+└── ui.html            # UIスレッド（HTML/CSS/JS）
+```
 
-#### Missing collections
-- **Cause**: Variables created without collections
-- **Solution**: Organize variables into collections in Figma
+## 🎯 **技術仕様**
 
-### Debug Mode
-Open browser dev tools to see detailed console logs:
-- Variable processing info
-- Export statistics
-- Error details with timestamps
+### **アーキテクチャ**
+- **メインスレッド**: Figma APIとの通信、変数データの取得
+- **UIスレッド**: ユーザーインターフェース、データの表示・操作
 
-## 🔄 Updates & Maintenance
+### **使用技術**
+- **TypeScript**: 型安全性の確保
+- **Figma Plugin API**: 変数データの取得
+- **HTML/CSS/JavaScript**: UIの実装
+- **PostMessage**: スレッド間通信
 
-### Version Updates
-1. Update `package.json` version
-2. Update `manifest.json` version if needed
-3. Compile with `npm run build`
-4. Test thoroughly
+### **データフロー**
+1. プラグイン起動 → 自動スキャン開始
+2. Figma APIから変数データを取得
+3. メインスレッドからUIスレッドにデータ送信
+4. UIスレッドでデータを表示・編集
+5. ユーザー操作に応じてデータを変換・ダウンロード
 
-### Adding New Export Formats
-1. Add format button in `ui.html`
-2. Implement generator function
-3. Update format selection logic
-4. Test with various variable types
+## 🤝 **コントリビューション**
 
-## 📄 License
+### **開発の流れ**
+1. Issueを作成して問題や改善点を報告
+2. ブランチを作成して開発
+3. テストを実行して動作確認
+4. プルリクエストを作成
+5. コードレビュー後にマージ
 
-MIT License - Feel free to modify and distribute.
+### **コーディング規約**
+- TypeScriptの型定義を適切に行う
+- エラーハンドリングを実装する
+- コンソールログでデバッグ情報を出力する
+- ユーザビリティを考慮したUI設計
 
-## 🤝 Contributing
+## 📄 **ライセンス**
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
+このプロジェクトは社内利用を目的としています。
 
-## 📞 Support
+## 📞 **サポート**
 
-For issues or questions:
-- Check the troubleshooting section
-- Review browser console for error details
-- Ensure you have the latest Figma desktop app
+問題や質問がある場合は、開発チームまでお問い合わせください。
 
 ---
 
-**Made with ❤️ for the Figma community**
+**最終更新**: 2024年12月
+**バージョン**: 1.0.0
