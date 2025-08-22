@@ -16,8 +16,7 @@ Figmaドキュメント内の変数（Variables）をJSON形式でダウンロ�
 
 **詳細**: [variables-downloader/README.md](variables-downloader/README.md)
 
-### **2. Get Variables ID** (`get-variables-id/`)
-Figma変数のIDを取得するシンプルなプラグイン
+
 
 ## 🚀 **クイックスタート**
 
@@ -31,12 +30,8 @@ Figma変数のIDを取得するシンプルなプラグイン
 git clone <repository-url>
 cd telemedicine-figma-plugin
 
-# 各プラグインのディレクトリで依存関係をインストール
+# プラグインのディレクトリで依存関係をインストール
 cd variables-downloader
-npm install
-npm run build
-
-cd ../get-variables-id
 npm install
 npm run build
 ```
@@ -45,7 +40,7 @@ npm run build
 1. Figma Desktop Appを開く
 2. 「Plugins」→「Development」→「New Plugin...」
 3. 「Import plugin from manifest...」をクリック
-4. 各プラグインの`manifest.json`ファイルを選択
+4. `variables-downloader/manifest.json`ファイルを選択
 
 ## 🏗️ **プロジェクト構成**
 
@@ -58,10 +53,6 @@ telemedicine-figma-plugin/
 │   ├── code.ts                 # メインロジック
 │   ├── ui.html                 # UI
 │   └── package.json            # 依存関係
-└── get-variables-id/           # 変数ID取得プラグイン
-    ├── manifest.json           # プラグイン設定
-    ├── code.ts                 # メインロジック
-    └── package.json            # 依存関係
 ```
 
 ## 🎯 **用途**
@@ -71,9 +62,7 @@ telemedicine-figma-plugin/
 - SCSS変数への変換
 - デザインとコードの同期
 
-### **Get Variables ID**
-- 変数IDの確認
-- 開発時の参照
+
 
 ## 🔧 **開発**
 
