@@ -1,10 +1,10 @@
 # Telemedicine Figma Plugin Collection
 
-オンライン診療アプリ「Levcli」用のFigmaプラグインコレクションです。
+オンライン診療アプリ「レバクリ」用のFigmaプラグインコレクションです。
 
 ## 📦 **含まれるプラグイン**
 
-### **1. Variables Downloader** (`variables-downloader/`)
+### **Variables Downloader** (`variables-downloader/`)
 Figmaドキュメント内の変数（Variables）をJSON形式でダウンロードできるプラグイン
 
 **主要機能:**
@@ -16,21 +16,15 @@ Figmaドキュメント内の変数（Variables）をJSON形式でダウンロ�
 
 **詳細**: [variables-downloader/README.md](variables-downloader/README.md)
 
-
-
 ## 🚀 **クイックスタート**
-
-### **前提条件**
-- Figma Desktop App
-- Node.js 16.0以上
 
 ### **セットアップ**
 ```bash
 # リポジトリをクローン
-git clone <repository-url>
+git clone https://github.com/lvgs-tmd/telemedicine-figma-plugin.git
 cd telemedicine-figma-plugin
 
-# プラグインのディレクトリで依存関係をインストール
+# プラグインのビルド
 cd variables-downloader
 npm install
 npm run build
@@ -47,12 +41,12 @@ npm run build
 ```
 telemedicine-figma-plugin/
 ├── README.md                    # このファイル
-├── variables-downloader/        # 変数ダウンロードプラグイン
-│   ├── README.md               # 詳細なドキュメント
-│   ├── manifest.json           # プラグイン設定
-│   ├── code.ts                 # メインロジック
-│   ├── ui.html                 # UI
-│   └── package.json            # 依存関係
+└── variables-downloader/        # 変数ダウンロードプラグイン
+    ├── README.md               # 詳細なドキュメント
+    ├── manifest.json           # プラグイン設定
+    ├── code.ts                 # メインロジック
+    ├── ui.html                 # UI
+    └── package.json            # 依存関係
 ```
 
 ## 🎯 **用途**
@@ -62,12 +56,4 @@ telemedicine-figma-plugin/
 - SCSS変数への変換
 - デザインとコードの同期
 
-
-
-## 🔧 **開発**
-
-### **ビルド**
-```bash
-# 全プラグインをビルド
-find . -name "package.json" -execdir npm run build \;
-```
+詳細な使用方法や開発情報は [variables-downloader/README.md](variables-downloader/README.md) を参照してください。
