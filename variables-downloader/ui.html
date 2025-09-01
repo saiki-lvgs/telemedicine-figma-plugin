@@ -178,21 +178,31 @@
       min-height: 0;
     }
     
+    .preview-container {
+      border: 1px solid #e9ecef;
+      border-radius: 8px;
+      background: #f8f9fa;
+      overflow: hidden;
+    }
+    
     .preview-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 12px;
       padding: 10px 12px;
       background: #f8f9fa;
-      border-radius: 6px;
-      border: 1px solid #e9ecef;
+      border-bottom: 1px solid #e9ecef;
     }
     
     .preview-title {
       font-weight: 600;
       font-size: 14px;
       color: #1a1a1a;
+      white-space: nowrap; /* 改行を防ぐ */
+      overflow: hidden;
+      text-overflow: ellipsis;
+      flex: 1; /* 残りのスペースを占有 */
+      margin-right: 8px; /* コピーボタンとの間隔 */
     }
     
     .preview-toggle {
@@ -227,6 +237,8 @@
       align-items: center;
       gap: 6px;
       box-shadow: 0 2px 4px rgba(40, 167, 69, 0.2);
+      white-space: nowrap; /* 改行を防ぐ */
+      flex-shrink: 0; /* 縮小を防ぐ */
     }
     
     .icon-copy {
@@ -247,14 +259,11 @@
     }
     
     .preview-content {
-      border: 1px solid #e9ecef;
-      border-radius: 8px;
-      background: #ffffff;
-      padding: 12px;
+      background: #f8f9fa; /* グレー背景に変更 */
+      padding: 0; /* パディングを削除してヘッダーと統合 */
       font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
       font-size: 10px;
       line-height: 1.4;
-      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
       overflow: visible; /* 外枠はスクロールさせない */
     }
     
@@ -441,19 +450,8 @@
 
     
     /* JSONプレビュー */
-    .preview-info {
-      font-weight: bold;
-      margin-bottom: 10px;
-      color: #333;
-      padding: 8px;
-      background: #f8f9fa;
-      border-radius: 4px;
-    }
-    
     .json-preview {
       background: #f8f9fa;
-      border: 1px solid #e9ecef;
-      border-radius: 4px;
       padding: 12px;
       font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
       font-size: 11px;
@@ -489,20 +487,7 @@
     
 
     
-    /* マッピング情報 */
-    .mapping-info {
-      background: #e3f2fd;
-      border: 1px solid #2196f3;
-      border-radius: 4px;
-      padding: 8px 12px;
-      margin: 8px 0;
-      font-size: 11px;
-      color: #1976d2;
-    }
-    
-    .mapping-info > div {
-      margin: 2px 0;
-    }
+
     
 
   </style>
@@ -567,20 +552,21 @@
       </button>
     </div>
     
-          <div id="previewSection" class="preview-section" style="display: block;">
-        <div class="preview-header">
-          <span class="preview-title">プレビュー</span>
-          <button id="copyPreviewBtn" class="copy-preview-btn">
-            <svg class="icon icon-copy" width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
-            </svg>
-            コピー
-          </button>
-        </div>
-              <div id="previewContent" class="preview-content">
-          <div class="preview-info">プレビュー</div>
-          <div class="no-results">
-            ダウンロードボタンをクリックして、Figmaドキュメント内の変数をスキャンしてください。
+                    <div id="previewSection" class="preview-section" style="display: block;">
+        <div class="preview-container">
+          <div class="preview-header">
+            <span class="preview-title">プレビュー</span>
+            <button id="copyPreviewBtn" class="copy-preview-btn">
+              <svg class="icon icon-copy" width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+              </svg>
+              コピー
+            </button>
+          </div>
+          <div id="previewContent" class="preview-content">
+            <div class="no-results">
+              変数をスキャン中... しばらくお待ちください。
+            </div>
           </div>
         </div>
     </div>
@@ -728,7 +714,6 @@
     function renderPreview(data) {
       if (!data || Object.keys(data).length === 0) {
         previewContent.innerHTML = `
-          <div class="preview-info">プレビュー</div>
           <div class="no-results">
             変数をスキャン中... しばらくお待ちください。
           </div>
@@ -742,23 +727,8 @@
       
       const exportCount = Object.keys(exportData).length;
       const modeText = processingMode === 'processed' ? 'マッピングデータ' : 'Rawデータ';
-      let html = `<div class="preview-info">ダウンロードされるデータ (${exportCount}件) - ${modeText}</div>`;
       
-      // マッピングデータの場合、マッピング状況の詳細を表示
-      if (processingMode === 'processed') {
-        const result = convertToProcessedFormat(variablesData);
-        const totalVariables = Object.keys(variablesData).length;
-        const mappedCount = Object.keys(result.mapping).length;
-        const unmappedCount = result.unmapped.length;
-        
-        html += `<div class="mapping-info">
-          <div>元の変数数: ${totalVariables}件</div>
-          <div>マッピング済み: ${mappedCount}件</div>
-          <div>未マッピング: ${unmappedCount}件</div>
-        </div>`;
-      }
-      
-      html += `<pre class="json-preview">${jsonContent}</pre>`;
+      let html = `<pre class="json-preview">${jsonContent}</pre>`;
       
       previewContent.innerHTML = html;
       
@@ -934,50 +904,38 @@
     
     // ページ読み込み時に自動的に変数をスキャン
     function startScan() {
-      console.log('Starting scan...'); // デバッグログ
       showStatus('変数をスキャン中...', 'info');
       // 初期状態でコレクション選択UIを表示（空の状態）
       renderCollectionOptions();
       parent.postMessage({ pluginMessage: { type: 'START_EXPORT' } }, '*');
     }
     
-    // 初期化状態をログ出力
-    console.log('Script loaded, readyState:', document.readyState);
-    console.log('DOM ready:', document.readyState === 'loading' ? 'No' : 'Yes');
-    
     // 複数のイベントでスキャンを開始
     window.addEventListener('DOMContentLoaded', () => {
-      console.log('DOMContentLoaded event fired');
       startScan();
     });
     
     window.addEventListener('load', () => {
-      console.log('Load event fired');
       startScan();
     });
     
     // 即座にスキャンを開始（既にDOMが準備できている場合）
     if (document.readyState === 'loading') {
-      console.log('DOM still loading, waiting for events...');
+      // DOM still loading, waiting for events...
     } else {
-      console.log('DOM already ready, starting scan immediately');
       startScan();
     }
     
     // 追加の初期化方法：setTimeoutで遅延実行
     setTimeout(() => {
-      console.log('Timeout fallback: checking if scan was started');
       if (!variablesData) {
-        console.log('No data found, starting scan via timeout');
         startScan();
       }
     }, 100);
     
     // さらに確実にするため、もう少し遅くにもチェック
     setTimeout(() => {
-      console.log('Second timeout fallback: checking if scan was started');
       if (!variablesData) {
-        console.log('Still no data, starting scan via second timeout');
         startScan();
       }
     }, 500);
@@ -985,12 +943,8 @@
     // メインスレッドからのメッセージ受信
     window.onmessage = (event) => {
       const msg = event.data.pluginMessage;
-      console.log('Received message:', msg); // デバッグログ
       
       if (msg.type === 'VARIABLES_DATA') {
-        console.log('Variables data received:', msg.data); // デバッグログ
-        console.log('Collections data received:', msg.collections); // デバッグログ
-        
         variablesData = msg.data;
         collectionsData = msg.collections;
         
@@ -1013,12 +967,9 @@
         processedModeRadio.checked = true;
         rawModeRadio.checked = false;
       } else if (msg.type === 'ERROR') {
-        console.error('Error received:', msg); // デバッグログ
         // 詳細エラー情報があれば表示
         if (msg.detailedMessage) {
           showStatus(`エラー: ${msg.message}`, 'error');
-          console.error('Detailed error:', msg.detailedMessage);
-          console.error('Timestamp:', msg.timestamp);
         } else {
           showStatus(`エラー: ${msg.message}`, 'error');
         }
