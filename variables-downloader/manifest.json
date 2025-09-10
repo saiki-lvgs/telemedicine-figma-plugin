@@ -4,9 +4,14 @@
   "api": "1.0.0",
   "main": "code.js",
   "ui": "ui.html",
-  "capabilities": [],
+  "capabilities": [
+    "inspect"
+  ],
   "enableProposedApi": false,
-  "editorType": ["figma"],
+  "editorType": [
+    "figma",
+    "dev"
+  ],
   "networkAccess": {
     "allowedDomains": [
       "none"
